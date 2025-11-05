@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using TestAPI.Exceptions;
 using TestAPI.Modelos;
+using TestAPI.Repositorios;
 using TestAPI.Servicios;
 
 namespace TestAPI.Controllers
@@ -24,8 +25,7 @@ namespace TestAPI.Controllers
         //Definición de endpoints
         //Obtener todas las tareas
         [HttpGet]
-   
-        
+           
         public async Task<IEnumerable<Tarea>> Obtener()
         {
            var lista = await _tareaServicio.ObtenerTodas();
@@ -36,7 +36,7 @@ namespace TestAPI.Controllers
 
         //Obtener tarea por id
         [HttpGet("{id:int}", Name = "ObtenerTareaPorId")]
-        [Authorize]
+        
 
         public async Task<ActionResult<Tarea>> ObtenerPorId(int id)
         {
@@ -48,7 +48,7 @@ namespace TestAPI.Controllers
 
         //Obtener tarea por estatus
         [HttpGet("estatus/{estatus:int}")]
-        [Authorize]
+        
 
         public async Task<ActionResult<IEnumerable<Tarea>>> ObtenerPorEstatus(int estatus)
         {
@@ -60,7 +60,7 @@ namespace TestAPI.Controllers
 
         //Creación de una tarea
         [HttpPost]
-        [Authorize]
+        
 
         public async Task<ActionResult<Tarea>> Crear([FromBody] Tarea nuevaTarea)
         {
@@ -75,14 +75,32 @@ namespace TestAPI.Controllers
 
         //Eliminar una tarea
         [HttpDelete("{id:int}")]
-        [Authorize]
-
         public async Task<IActionResult> Eliminar(int id)
         {
             var tareas = await _tareaServicio.EliminarTarea(id);
             if (tareas == null)
                 throw new NoDataException("no hay tareas con ese id");
             return Ok(tareas);
+        }
+
+
+        //Actualizar una tarea
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> ActualizarTarea(int id, Tarea tarea)
+        {
+            if (id != tarea.Id)
+            {
+                return BadRequest("El ID de la URL no coincide con el ID del cuerpo");
+            }
+
+            var resultado = await _tareaServicio.ActualizarTarea(tarea);
+
+            if (resultado)
+            {
+                return NoContent(); // Éxito (Código 204)
+            }
+
+            return NotFound(); // O un error
         }
 
 

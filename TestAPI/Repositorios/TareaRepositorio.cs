@@ -14,6 +14,7 @@ namespace TestAPI.Repositorios
         Task<IEnumerable<Tarea>> ObtenerPorEstatus(int estatus);
         Task<int> CrearTarea(Tarea tarea);
         Task<bool> EliminarTarea(int id);
+        Task<bool> ActualizarTarea(Tarea tarea);
     }
 
     public class TareaRepositorio : ITareaRepositorio
@@ -54,14 +55,14 @@ namespace TestAPI.Repositorios
             using var conexion = new SqlConnection(_connectionString);
 
             var sql = @"
-                INSERT INTO Tareas (Id, Titulo, Descripcion, FechaEntrega, Estatus)
-                VALUES (@Id, @Titulo, @Descripcion, @FechaEntrega, @Estatus);
+                INSERT INTO Tareas (Titulo, Descripcion, FechaEntrega, Estatus)
+                VALUES (@Titulo, @Descripcion, @FechaEntrega, @Estatus);
+
                
             ";
 
             var id = await conexion.ExecuteAsync(sql, new
             {
-                tarea.Id,
                 tarea.Titulo,
                 tarea.Descripcion,
                 tarea.FechaEntrega,
@@ -80,6 +81,33 @@ namespace TestAPI.Repositorios
             using var conexion = new SqlConnection(_connectionString);
             var rows = await conexion.ExecuteAsync("DELETE FROM Tareas WHERE Id = @Id", new { Id = id });
             return rows > 0;
+        }
+
+        public async Task<bool> ActualizarTarea(Tarea tarea)
+        {
+            using var conexion = new SqlConnection(_connectionString);
+
+            var sql = @"
+            UPDATE Tareas
+            SET Titulo = @Titulo,
+                Descripcion = @Descripcion,
+                FechaEntrega = @FechaEntrega,
+                Estatus = @Estatus
+            WHERE Id = @Id;
+        ";
+
+            var filasAfectadas = await conexion.ExecuteAsync(sql, new
+            {
+                tarea.Titulo,
+                tarea.Descripcion,
+                tarea.FechaEntrega,
+                tarea.Estatus,
+                tarea.Id  // Asegúrate de pasar el Id para el WHERE
+            });
+
+            // ExecuteAsync devuelve el número de filas afectadas.
+            // Si es mayor a 0, la actualización fue exitosa.
+            return filasAfectadas > 0;
         }
 
 

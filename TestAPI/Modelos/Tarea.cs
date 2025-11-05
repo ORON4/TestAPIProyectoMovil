@@ -1,4 +1,7 @@
-﻿namespace TestAPI.Modelos
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace TestAPI.Modelos
 {
     public class Tarea
     {

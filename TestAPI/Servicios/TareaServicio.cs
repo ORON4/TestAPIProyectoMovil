@@ -14,6 +14,7 @@ namespace TestAPI.Servicios
         Task<IEnumerable<Tarea>> ObtenerPorEstatus(int estatus);
         Task<Tarea> CrearTarea(Tarea tarea);
         Task<bool> EliminarTarea(int id);
+        Task<bool> ActualizarTarea(Tarea tarea);
     }
 
     public class TareaServicio : ITareaServicio
@@ -50,6 +51,10 @@ namespace TestAPI.Servicios
         public async Task<bool> EliminarTarea(int id)
         {
             return await _tareaRepositorio.EliminarTarea(id);
+        }
+        public async Task<bool> ActualizarTarea(Tarea tarea)
+        {
+            return await _tareaRepositorio.ActualizarTarea(tarea);
         }
 
         
