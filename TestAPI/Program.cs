@@ -17,6 +17,8 @@ builder.Services.AddTransient<ITareaServicio, TareaServicio>();
 builder.Services.AddTransient<ITareaRepositorio, TareaRepositorio>();
 builder.Services.AddTransient<IUsuarioServicio, UsuarioServicio>();
 builder.Services.AddTransient<IUsuarioRepositorio, UsuarioRepositorio>();
+builder.Services.AddTransient<IAlumnosAsistenciaRepositorio, AlumnosAsistenciaRepositorio>();
+builder.Services.AddTransient<IAlumnosAsistenciaServicio, AlumnosAsistenciaServicio>();
 
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer("Bearer", options =>
