@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using TestAPI.Modelos;
+using System;
 
 namespace TestAPI.Repositorios
 {
@@ -64,6 +65,26 @@ namespace TestAPI.Repositorios
             var sql = "DELETE FROM AlumnosAsistencia WHERE Id = @Id";
             var filas = await conexion.ExecuteAsync(sql, new { Id = id });
             return filas > 0;
+        }
+
+        public async Task<IEnumerable<AsistenciaReporte>> ObtenerPorFecha(DateTime fecha)
+        {
+            using var conexion = new SqlConnection(_connectionString);
+
+            // Este SQL une las dos tablas para obtener el nombre del alumno
+            var sql = @"
+                SELECT 
+                    a.Id,
+                    a.IdAlumno,
+                    al.NombreAlumno,
+                    a.Fecha,
+                    a.Asistencia
+                FROM AlumnosAsistencia a
+                INNER JOIN Alumnos al ON a.IdAlumno = al.Id
+                WHERE CONVERT(date, a.Fecha) = CONVERT(date, @Fecha);
+            ";
+
+            return await conexion.QueryAsync<AsistenciaReporte>(sql, new { Fecha = fecha });
         }
     }
 }

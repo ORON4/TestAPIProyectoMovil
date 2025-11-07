@@ -29,5 +29,10 @@ namespace TestAPI.Servicios
         {
             return await _alumnosAsistenciaRepositorio.EliminarAlumnosAsistencia(id);
         }
+
+        public async Task<IEnumerable<AsistenciaReporte>> ObtenerPorFecha(DateTime fecha)
+        {
+            return await _alumnosAsistenciaRepositorio.ObtenerPorFecha(fecha);
+        }
     }
 }

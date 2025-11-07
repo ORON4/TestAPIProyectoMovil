@@ -25,13 +25,11 @@ namespace TestAPI.Controllers
         //Definición de endpoints
         //Obtener todas las tareas
         [HttpGet]
-           
-        public async Task<IEnumerable<Tarea>> Obtener()
+
+        public async Task<ActionResult<IEnumerable<Tarea>>> Obtener()
         {
-           var lista = await _tareaServicio.ObtenerTodas();
-            if (lista == null || !lista.Any())
-                throw new NoDataException("No hay tareas disponibles");
-            return lista;
+            var lista = await _tareaServicio.ObtenerTodas();
+            return Ok(lista);
         }
 
         //Obtener tarea por id

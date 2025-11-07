@@ -12,5 +12,7 @@ namespace TestAPI.Servicios
         Task<bool> GuardarAsistencia(AlumnosAsistencia alumnosAsistencia);
 
         Task<bool> EliminarAlumnosAsistencia(int id);
+
+        Task<IEnumerable<AsistenciaReporte>> ObtenerPorFecha(DateTime fecha);
     }
 }

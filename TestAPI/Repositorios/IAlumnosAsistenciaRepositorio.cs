@@ -13,5 +13,7 @@ namespace TestAPI.Repositorios
 
         // Mantengo este método por si lo tenías
         Task<bool> EliminarAlumnosAsistencia(int id);
+
+        Task<IEnumerable<AsistenciaReporte>> ObtenerPorFecha(DateTime fecha);
     }
 }

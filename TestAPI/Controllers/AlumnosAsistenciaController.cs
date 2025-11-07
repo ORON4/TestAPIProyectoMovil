@@ -32,5 +32,18 @@ namespace TestAPI.Controllers
 
             return BadRequest("No se pudo guardar la asistencia.");
         }
+
+        [HttpGet("fecha/{fecha:datetime}")]
+        public async Task<ActionResult<IEnumerable<AsistenciaReporte>>> ObtenerPorFecha(DateTime fecha)
+        {
+            var reporte = await _asistenciaServicio.ObtenerPorFecha(fecha);
+
+            if (reporte == null || !reporte.Any())
+            {
+                return NotFound("No se encontraron asistencias para esa fecha.");
+            }
+
+            return Ok(reporte);
+        }
     }
 }
