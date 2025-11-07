@@ -7,13 +7,6 @@ using TestAPI.Modelos;
 
 namespace TestAPI.Repositorios
 {
-    public interface IAlumnosAsistenciaRepositorio
-    {
-        Task<IEnumerable<AlumnosAsistencia>> ObtenerTodas();
-        Task<int> CrearAlumnosAsistencia(AlumnosAsistencia alumnosAsistencia);
-        Task<bool> EliminarAlumnosAsistencia(int id);
-    }
-
     public class AlumnosAsistenciaRepositorio : IAlumnosAsistenciaRepositorio
     {
         private readonly string _connectionString;
@@ -23,46 +16,54 @@ namespace TestAPI.Repositorios
             _connectionString = configuration.GetConnectionString("DefaultConnection");
         }
 
-
         public async Task<IEnumerable<AlumnosAsistencia>> ObtenerTodas()
         {
-            var conexion = new SqlConnection(_connectionString);
-
-            return await conexion.QueryAsync<AlumnosAsistencia>("SELECT * FROM AlumnosAsistencia");
+            using var conexion = new SqlConnection(_connectionString);
+            // NOTA: Este SQL puede fallar ahora si 'Grupo' ya no existe.
+            // Deberías hacer un JOIN con la tabla Alumnos si necesitas mostrar todo.
+            var sql = "SELECT * FROM AlumnosAsistencia";
+            return await conexion.QueryAsync<AlumnosAsistencia>(sql);
         }
 
-        public async Task<int> CrearAlumnosAsistencia(AlumnosAsistencia alumnosAsistencia)
+        // MÉTODO 'Crear' REEMPLAZADO POR 'GuardarAsistencia' (UPSERT)
+        public async Task<bool> GuardarAsistencia(AlumnosAsistencia asistencia)
         {
             using var conexion = new SqlConnection(_connectionString);
 
+            // Esta es la lógica "UPSERT"
             var sql = @"
-                INSERT INTO AlumnosAsistencia (NombreAlumno, Grupo, Fecha, Asistencia)
-                VALUES (@NombreAlumno, @Grupo, @Fecha, @Asistencia);
+                -- 1. Intenta ACTUALIZAR si ya existe un registro
+                UPDATE AlumnosAsistencia
+                SET 
+                    Asistencia = @Asistencia
+                WHERE 
+                    IdAlumno = @IdAlumno AND CONVERT(date, Fecha) = CONVERT(date, @Fecha);
 
-               
+                -- 2. Si no se afectó ninguna fila (@@ROWCOUNT = 0),
+                --    significa que no existía, entonces lo INSERTAMOS.
+                IF (@@ROWCOUNT = 0)
+                BEGIN
+                    INSERT INTO AlumnosAsistencia (IdAlumno, Fecha, Asistencia)
+                    VALUES (@IdAlumno, @Fecha, @Asistencia);
+                END
             ";
 
-            var nuevoid = await conexion.ExecuteAsync(sql, new
+            var filasAfectadas = await conexion.ExecuteAsync(sql, new
             {
-                alumnosAsistencia.NombreAlumno,
-                alumnosAsistencia.Grupo,
-                alumnosAsistencia.Fecha,
-                alumnosAsistencia.Asistencia
+                asistencia.IdAlumno,
+                asistencia.Fecha,
+                asistencia.Asistencia
             });
 
-
-            
-
-            return nuevoid;
+            return filasAfectadas > 0;
         }
 
         public async Task<bool> EliminarAlumnosAsistencia(int id)
         {
             using var conexion = new SqlConnection(_connectionString);
-            var rows = await conexion.ExecuteAsync("DELETE FROM AlumnosAsistencia WHERE Id = @Id", new { Id = id });
-            return rows > 0;
+            var sql = "DELETE FROM AlumnosAsistencia WHERE Id = @Id";
+            var filas = await conexion.ExecuteAsync(sql, new { Id = id });
+            return filas > 0;
         }
-
-
     }
 }

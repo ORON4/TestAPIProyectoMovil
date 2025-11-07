@@ -5,6 +5,7 @@ using System.Text;
 using TestAPI.Middleware;
 using TestAPI.Repositorios;
 using TestAPI.Servicios;
+using static TestAPI.Servicios.AlumnoServicio;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,8 +18,10 @@ builder.Services.AddTransient<ITareaServicio, TareaServicio>();
 builder.Services.AddTransient<ITareaRepositorio, TareaRepositorio>();
 builder.Services.AddTransient<IUsuarioServicio, UsuarioServicio>();
 builder.Services.AddTransient<IUsuarioRepositorio, UsuarioRepositorio>();
-builder.Services.AddTransient<IAlumnosAsistenciaRepositorio, AlumnosAsistenciaRepositorio>();
-builder.Services.AddTransient<IAlumnosAsistenciaServicio, AlumnosAsistenciaServicio>();
+builder.Services.AddScoped<IAlumnosAsistenciaRepositorio, AlumnosAsistenciaRepositorio>();
+builder.Services.AddScoped<IAlumnosAsistenciaServicio, AlumnosAsistenciaServicio>();
+builder.Services.AddScoped<IAlumnosServicio, AlumnosServicio>();
+builder.Services.AddScoped<IAlumnosRepositorio, AlumnosRepositorio>();
 
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer("Bearer", options =>

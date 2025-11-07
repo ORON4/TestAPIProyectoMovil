@@ -1,69 +1,36 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
-using TestAPI.Exceptions;
 using TestAPI.Modelos;
-using TestAPI.Repositorios;
 using TestAPI.Servicios;
 
 namespace TestAPI.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("[controller]")] // Ruta base /AlumnosAsistencia
     public class AlumnosAsistenciaController : ControllerBase
-
     {
-        //Servicio
-        private readonly IAlumnosAsistenciaServicio _AlumnosAsistenciaServicio;
+        private readonly IAlumnosAsistenciaServicio _asistenciaServicio;
 
-        //Constructor que da valor inicial a los servicios y/o propiedades
-        public AlumnosAsistenciaController(IAlumnosAsistenciaServicio alumnosAsistenciaServicio)
+        public AlumnosAsistenciaController(IAlumnosAsistenciaServicio asistenciaServicio)
         {
-            _AlumnosAsistenciaServicio = alumnosAsistenciaServicio;
+            _asistenciaServicio = asistenciaServicio;
         }
 
-        //Definición de endpoints
-        //Obtener todas las asistencias
-        [HttpGet]
-
-        public async Task<IEnumerable<AlumnosAsistencia>> Obtener()
-        {
-            var lista = await _AlumnosAsistenciaServicio.ObtenerTodas();
-            if (lista == null || !lista.Any())
-                throw new NoDataException("No hay datos disponibles");
-            return lista;
-        }
-
-        //Creación de una asistencia
+        // --- MODIFICADO / NUEVO ENDPOINT 'POST' ---
         [HttpPost]
-        public async Task<ActionResult<AlumnosAsistencia>>Crear([FromBody] AlumnosAsistencia nuevaAlumnosAsistencia)
+        public async Task<IActionResult> GuardarAsistencia([FromBody] AlumnosAsistencia asistencia)
         {
-            if (nuevaAlumnosAsistencia == null) return BadRequest();
-            var creada = await _AlumnosAsistenciaServicio.CrearAlumnosAsistencia(nuevaAlumnosAsistencia);
+            if (asistencia == null)
+                return BadRequest();
 
-            nuevaAlumnosAsistencia.Id = 0;
+            var resultado = await _asistenciaServicio.GuardarAsistencia(asistencia);
 
+            if (resultado)
+            {
+                return Ok(); // O return NoContent();
+            }
 
-            return CreatedAtRoute("ObtenerTareaPorId", new { id = creada.Id }, creada);
+            return BadRequest("No se pudo guardar la asistencia.");
         }
-
-        //Eliminar una asistencia
-        [HttpDelete("{id:int}")]
-        public async Task<IActionResult> Eliminar(int id)
-        {
-            var alumnosAsistencia = await _AlumnosAsistenciaServicio.EliminarAlumnosAsistencia(id);
-            if (alumnosAsistencia == null)
-                throw new NoDataException("no hay asistencias con ese id");
-            return Ok(alumnosAsistencia);
-        }
-
-
-
-
-
-
-
-
     }
 }
-
