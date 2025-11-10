@@ -16,7 +16,7 @@ namespace TestAPI.Controllers
             _alumnosServicio = alumnosServicio;
         }
 
-        [HttpGet("grupo/{idGrupo:int}")] // Ruta: GET /api/Alumnos/grupo/1
+        [HttpGet("grupo/{idGrupo:int}")] // Ruta: GET Alumnos/grupo/1
         public async Task<ActionResult<IEnumerable<Alumno>>> ObtenerPorGrupo(int idGrupo)
         {
             var alumnos = await _alumnosServicio.ObtenerPorGrupo(idGrupo);
@@ -25,6 +25,17 @@ namespace TestAPI.Controllers
                 return NotFound("No se encontraron alumnos para ese grupo.");
             }
             return Ok(alumnos);
+        }
+
+        [HttpGet("{id:int}")] // Ruta: GET Alumno/5
+        public async Task<ActionResult<Alumno>> ObtenerPorId(int id)
+        {
+            var alumno = await _alumnosServicio.ObtenerPorId(id);
+            if (alumno == null)
+            {
+                return NotFound("No se encontró ningún alumno con ese ID.");
+            }
+            return Ok(alumno);
         }
     }
 }

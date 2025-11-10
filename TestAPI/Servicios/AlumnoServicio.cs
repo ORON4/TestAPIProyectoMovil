@@ -18,6 +18,11 @@ namespace TestAPI.Servicios
             {
                 return await _alumnosRepositorio.ObtenerPorGrupo(idGrupo);
             }
+
+            public async Task<Alumno> ObtenerPorId(int id)
+            {
+                return await _alumnosRepositorio.ObtenerPorId(id);
+            }
         }
     }
 }

@@ -8,6 +8,7 @@ namespace TestAPI.Repositorios
     public interface IAlumnosRepositorio
     {
         Task<IEnumerable<Alumno>> ObtenerPorGrupo(int idGrupo);
+        Task<Alumno> ObtenerPorId(int id); 
     }
     
 }

@@ -22,5 +22,12 @@ namespace TestAPI.Repositorios
             var sql = "SELECT * FROM Alumnos WHERE Grupo = @IdGrupo";
             return await conexion.QueryAsync<Alumno>(sql, new { IdGrupo = idGrupo });
         }
+
+        public async Task<Alumno> ObtenerPorId(int id)
+        {
+            using var conexion = new SqlConnection(_connectionString);
+            var sql = "SELECT * FROM Alumnos WHERE Id = @Id";
+            return await conexion.QueryFirstOrDefaultAsync<Alumno>(sql, new { Id = id });
+        }
     }
 }
