@@ -1,9 +1,8 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using TestAPI.Exceptions;
 using TestAPI.Modelos;
-using TestAPI.Repositorios;
 using TestAPI.Servicios;
 
 namespace TestAPI.Controllers
@@ -11,97 +10,87 @@ namespace TestAPI.Controllers
     [ApiController]
     [Route("[controller]")]
     public class TareaController : ControllerBase
-
     {
-        //Servicio
         private readonly ITareaServicio _tareaServicio;
 
-        //Constructor que da valor inicial a los servicios y/o propiedades
         public TareaController(ITareaServicio tareaServicio)
         {
             _tareaServicio = tareaServicio;
         }
 
-        //Definición de endpoints
-        //Obtener todas las tareas
-        [HttpGet]
-
-        public async Task<ActionResult<IEnumerable<Tarea>>> Obtener()
+        // 1. OBTENER TAREAS DE UN ALUMNO
+        // GET: /tarea/alumno/5
+        [HttpGet("alumno/{alumnoId:int}")]
+        public async Task<ActionResult<IEnumerable<TareaAlumnoDTO>>> ObtenerPorAlumno(int alumnoId)
         {
-            var lista = await _tareaServicio.ObtenerTodas();
+            var lista = await _tareaServicio.ObtenerPorAlumno(alumnoId);
+            // Si la lista está vacía, devolvemos una lista vacía en lugar de error,
+            // para que el frontend simplemente muestre "No hay tareas".
             return Ok(lista);
         }
 
-        //Obtener tarea por id
-        [HttpGet("{id:int}", Name = "ObtenerTareaPorId")]
-        
-
-        public async Task<ActionResult<Tarea>> ObtenerPorId(int id)
-        {
-            var tarea = await _tareaServicio.ObtenerPorId(id);
-            if (tarea == null)
-                throw new NoDataException("no hay tareas con ese id");
-            return Ok(tarea);
-        }
-
-        //Obtener tarea por estatus
-        [HttpGet("estatus/{estatus:int}")]
-        
-
-        public async Task<ActionResult<IEnumerable<Tarea>>> ObtenerPorEstatus(int estatus)
-        {
-            var tareas = await _tareaServicio.ObtenerPorEstatus(estatus);
-            if (tareas == null || !tareas.Any())
-                throw new NoDataException("no hay tareas con ese estatus");
-            return Ok(tareas);
-        }
-
-        //Creación de una tarea
+        // 2. CREAR UNA TAREA (ASIGNADA A TODOS)
+        // POST: /tarea
         [HttpPost]
-        
-
         public async Task<ActionResult<Tarea>> Crear([FromBody] Tarea nuevaTarea)
         {
-            if (nuevaTarea == null) return BadRequest();
-            var creada = await _tareaServicio.CrearTarea(nuevaTarea);
+            if (nuevaTarea == null) return BadRequest("La tarea no puede ser nula");
 
-            nuevaTarea.Id = 0;
+            // Esto crea la tarea global y la inserta en la tabla de todos los alumnos
+            var creada = await _tareaServicio.CrearTareaParaTodos(nuevaTarea);
 
-            
-            return CreatedAtRoute("ObtenerTareaPorId", new { id = creada.Id }, creada);
+            return Ok(creada);
         }
 
-        //Eliminar una tarea
-        [HttpDelete("{id:int}")]
-        public async Task<IActionResult> Eliminar(int id)
+        // 3. MARCAR TAREA COMO ENTREGADA
+        // PUT: /tarea/entregar/105 (Donde 105 es el AlumnoTareaId, NO el Id global)
+        [HttpPut("entregar/{alumnoTareaId:int}")]
+        public async Task<IActionResult> MarcarEntregada(int alumnoTareaId)
         {
-            var tareas = await _tareaServicio.EliminarTarea(id);
-            if (tareas == null)
-                throw new NoDataException("no hay tareas con ese id");
-            return Ok(tareas);
+            var exito = await _tareaServicio.MarcarEntregada(alumnoTareaId);
+
+            if (!exito)
+                return NotFound("No se encontró la asignación de tarea para actualizar.");
+
+            return NoContent(); // 204 No Content (Éxito)
         }
 
+        // 4. ELIMINAR TAREA DE LA VISTA DE UN ALUMNO
+        // DELETE: /tarea/asignacion/105 (Donde 105 es el AlumnoTareaId)
+        [HttpDelete("asignacion/{alumnoTareaId:int}")]
+        public async Task<IActionResult> EliminarDeAlumno(int alumnoTareaId)
+        {
+            var exito = await _tareaServicio.EliminarTareaDeAlumno(alumnoTareaId);
 
-        //Actualizar una tarea
+            if (!exito)
+                return NotFound("No se encontró la asignación de tarea para eliminar.");
+
+            return NoContent();
+        }
+
+        // 5. ACTUALIZAR DEFINICIÓN GLOBAL (Título, Descripción, etc.)
+        // PUT: /tarea/1
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> ActualizarTarea(int id, Tarea tarea)
+        public async Task<IActionResult> ActualizarDefinicion(int id, [FromBody] Tarea tarea)
         {
             if (id != tarea.Id)
-            {
                 return BadRequest("El ID de la URL no coincide con el ID del cuerpo");
-            }
 
-            var resultado = await _tareaServicio.ActualizarTarea(tarea);
+            var exito = await _tareaServicio.ActualizarDefinicion(tarea);
 
-            if (resultado)
-            {
-                return NoContent(); // Éxito (Código 204)
-            }
+            if (!exito)
+                return NotFound("No se encontró la tarea original.");
 
-            return NotFound(); // O un error
+            return NoContent();
         }
 
-
-
+        // (Opcional) Obtener definición global por ID
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<Tarea>> ObtenerDefinicion(int id)
+        {
+            var tarea = await _tareaServicio.ObtenerDefinicion(id);
+            if (tarea == null) return NotFound();
+            return Ok(tarea);
+        }
     }
 }

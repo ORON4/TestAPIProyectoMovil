@@ -9,6 +9,6 @@ namespace TestAPI.Modelos
         public string Titulo { get; set; }
         public string Descripcion { get; set; }
         public DateTime FechaEntrega { get; set; }
-        public bool Estatus { get; set; }
+        
     }
 }

@@ -1,20 +1,18 @@
 ﻿using System.Collections.Generic;
-using System.Data;
 using System.Threading.Tasks;
 using TestAPI.Modelos;
 using TestAPI.Repositorios;
-using TestAPI.Exceptions;
 
 namespace TestAPI.Servicios
 {
     public interface ITareaServicio
     {
-        Task<IEnumerable<Tarea>> ObtenerTodas();
-        Task<Tarea?> ObtenerPorId(int id);
-        Task<IEnumerable<Tarea>> ObtenerPorEstatus(int estatus);
-        Task<Tarea> CrearTarea(Tarea tarea);
-        Task<bool> EliminarTarea(int id);
-        Task<bool> ActualizarTarea(Tarea tarea);
+        Task<IEnumerable<TareaAlumnoDTO>> ObtenerPorAlumno(int alumnoId);
+        Task<Tarea> CrearTareaParaTodos(Tarea tarea);
+        Task<bool> MarcarEntregada(int alumnoTareaId);
+        Task<bool> EliminarTareaDeAlumno(int alumnoTareaId);
+        Task<bool> ActualizarDefinicion(Tarea tarea);
+        Task<Tarea?> ObtenerDefinicion(int id);
     }
 
     public class TareaServicio : ITareaServicio
@@ -26,37 +24,36 @@ namespace TestAPI.Servicios
             _tareaRepositorio = tareaRepositorio;
         }
 
-        public async Task<IEnumerable<Tarea>> ObtenerTodas()
+        public async Task<IEnumerable<TareaAlumnoDTO>> ObtenerPorAlumno(int alumnoId)
         {
-            return await _tareaRepositorio.ObtenerTodas();
+            return await _tareaRepositorio.ObtenerPorAlumno(alumnoId);
         }
 
-        public async Task<Tarea?> ObtenerPorId(int id)
+        public async Task<Tarea> CrearTareaParaTodos(Tarea tarea)
         {
-            return await _tareaRepositorio.ObtenerPorId(id);
-        }
-
-        public async Task<IEnumerable<Tarea>> ObtenerPorEstatus(int estatus)
-        {
-            return await _tareaRepositorio.ObtenerPorEstatus(estatus);
-        }
-
-        public async Task<Tarea> CrearTarea(Tarea tarea)
-        {
-            var newId = await _tareaRepositorio.CrearTarea(tarea);
+            var newId = await _tareaRepositorio.CrearTareaParaTodos(tarea);
             tarea.Id = newId;
             return tarea;
         }
 
-        public async Task<bool> EliminarTarea(int id)
+        public async Task<bool> MarcarEntregada(int alumnoTareaId)
         {
-            return await _tareaRepositorio.EliminarTarea(id);
-        }
-        public async Task<bool> ActualizarTarea(Tarea tarea)
-        {
-            return await _tareaRepositorio.ActualizarTarea(tarea);
+            return await _tareaRepositorio.MarcarEntregada(alumnoTareaId);
         }
 
-        
+        public async Task<bool> EliminarTareaDeAlumno(int alumnoTareaId)
+        {
+            return await _tareaRepositorio.EliminarTareaDeAlumno(alumnoTareaId);
+        }
+
+        public async Task<bool> ActualizarDefinicion(Tarea tarea)
+        {
+            return await _tareaRepositorio.ActualizarDefinicionTarea(tarea);
+        }
+
+        public async Task<Tarea?> ObtenerDefinicion(int id)
+        {
+            return await _tareaRepositorio.ObtenerDefinicionPorId(id);
+        }
     }
 }
